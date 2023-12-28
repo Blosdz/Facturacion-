@@ -1,0 +1,108 @@
+-- Crear la base de datos
+CREATE DATABASE IF NOT EXISTS `devpro` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- Usar la base de datos
+USE `devpro`;
+
+-- Tabla `clients`
+CREATE TABLE IF NOT EXISTS `clients` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `hostname_id` BIGINT UNSIGNED DEFAULT NULL,
+  `number` VARCHAR(255) NOT NULL,
+  `name` VARCHAR(255) NOT NULL,
+  `email` VARCHAR(255) NOT NULL,
+  `token` VARCHAR(255) NOT NULL,
+  `locked` TINYINT NOT NULL DEFAULT '0',
+  `plan_id` INT UNSIGNED NOT NULL,
+  `created_at` TIMESTAMP NULL DEFAULT NULL,
+  `updated_at` TIMESTAMP NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `clients_hostname_id_foreign` (`hostname_id`),
+  INDEX `clients_plan_id_foreign` (`plan_id`),
+  CONSTRAINT `clients_hostname_id_foreign` FOREIGN KEY (`hostname_id`) REFERENCES `hostnames` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `clients_plan_id_foreign` FOREIGN KEY (`plan_id`) REFERENCES `plans` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabla `hostnames`
+CREATE TABLE IF NOT EXISTS `hostnames` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `fqdn` VARCHAR(255) NOT NULL,
+  `redirect_to` VARCHAR(255) DEFAULT NULL,
+  `force_https` TINYINT NOT NULL DEFAULT '0',
+  `under_maintenance_since` TIMESTAMP NULL DEFAULT NULL,
+  `website_id` BIGINT UNSIGNED DEFAULT NULL,
+  `created_at` TIMESTAMP NULL DEFAULT NULL,
+  `updated_at` TIMESTAMP NULL DEFAULT NULL,
+  `deleted_at` TIMESTAMP NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `hostnames_fqdn_unique` (`fqdn`),
+  INDEX `hostnames_website_id_foreign` (`website_id`),
+  CONSTRAINT `hostnames_website_id_foreign` FOREIGN KEY (`website_id`) REFERENCES `websites` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Otras tablas...
+
+-- Tabla `migrations`
+CREATE TABLE IF NOT EXISTS `migrations` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `migration` VARCHAR(255) NOT NULL,
+  `batch` INT NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabla `password_resets`
+CREATE TABLE IF NOT EXISTS `password_resets` (
+  `email` VARCHAR(255) NOT NULL,
+  `token` VARCHAR(255) NOT NULL,
+  `created_at` TIMESTAMP NULL DEFAULT NULL,
+  KEY `password_resets_email_index` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabla `plan_documents`
+CREATE TABLE IF NOT EXISTS `plan_documents` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `description` VARCHAR(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabla `plans`
+CREATE TABLE IF NOT EXISTS `plans` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(255) NOT NULL,
+  `pricing` DOUBLE NOT NULL,
+  `limit_users` BIGINT NOT NULL,
+  `limit_documents` BIGINT NOT NULL,
+  `plan_documents` JSON NOT NULL,
+  `locked` TINYINT NOT NULL DEFAULT '0',
+  `created_at` TIMESTAMP NULL DEFAULT NULL,
+  `updated_at` TIMESTAMP NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabla `users`
+CREATE TABLE IF NOT EXISTS `users` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(255) NOT NULL,
+  `email` VARCHAR(255) NOT NULL,
+  `email_verified_at` TIMESTAMP NULL DEFAULT NULL,
+  `password` VARCHAR(255) NOT NULL,
+  `api_token` VARCHAR(255) DEFAULT NULL,
+  `remember_token` VARCHAR(100) DEFAULT NULL,
+  `created_at` TIMESTAMP NULL DEFAULT NULL,
+  `updated_at` TIMESTAMP NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `users_email_unique` (`email`),
+  UNIQUE KEY `users_api_token_unique` (`api_token`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabla `websites`
+CREATE TABLE IF NOT EXISTS `websites` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `uuid` VARCHAR(255) NOT NULL,
+  `created_at` TIMESTAMP NULL DEFAULT NULL,
+  `updated_at` TIMESTAMP NULL DEFAULT NULL,
+  `deleted_at` TIMESTAMP NULL DEFAULT NULL,
+  `managed_by_database_connection` VARCHAR(255) DEFAULT NULL COMMENT 'References the database connection key in your database.php',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `websites_uuid_unique` (`uuid`)
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
